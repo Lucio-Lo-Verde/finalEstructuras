@@ -8,8 +8,17 @@
  */
 
 package TDAStack;
-import org.junit.*;                         //For tags
-import static org.junit.Assert.*;           //For assertions
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Test;
+
+//For assertions
 
 
 public class StackTest {
@@ -19,7 +28,7 @@ public class StackTest {
 
 	private Stack<String> getStack()
 	{
-	  return new ArrayStack<String>();
+	  return new LinkedStack<String>();
 	  
 	 }
 	
