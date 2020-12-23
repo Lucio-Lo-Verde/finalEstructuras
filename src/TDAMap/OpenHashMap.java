@@ -1,8 +1,6 @@
 package TDAMap;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import TDAList.DoubleLinkedList;
 import TDAList.InvalidPositionException;
@@ -18,9 +16,9 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 	protected final float FACTOR = 0.5f; //creo que era 0.5
 
 	public OpenHashMap() {
-		cantBuckets = 1001;
-		contenedor = new PositionList[cantBuckets];
-		for(int i=0 ; i<cantBuckets ; i++) {
+		this.cantBuckets = 1001;
+		contenedor = new PositionList[this.cantBuckets];
+		for(int i=0 ; i<this.cantBuckets ; i++) {
 			contenedor[i] = new DoubleLinkedList<Entry<K,V>>();
 		}
 		size = 0;
@@ -52,7 +50,7 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 		Iterator<Entry<K,V>> itBucket = bucket.iterator();
 		boolean esta = false;
 		Entry<K,V> entrada = null;
-		
+
 		while(!esta && itBucket.hasNext()) {
 			entrada = itBucket.next();
 			esta = entrada.getKey().equals(key);
@@ -60,10 +58,10 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 		V aRetornar = null;
 		if(esta)
 			aRetornar = entrada.getValue();
-			
+
 		return aRetornar;
 	}
-	
+
 	private void resize() {
 		//Creo un contenedor de buckets mas grande y lo lleno de listas vacias
 		int tamanio = nextPrimo(cantBuckets*2);
@@ -72,58 +70,49 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 			nuevoContenedor[i]= new DoubleLinkedList<Entry<K,V>>();
 		}
 		//-----------------------------------
-		
+
 		//cambio el tamaño del arreglo anterior para poder hacer un nuevo hashcode
 		cantBuckets = tamanio;
-		
+
 		//recorro el arreglo del primer contenedor
 		for(int i= 0;i<contenedor.length;i++) {
 			PositionList<Entry<K,V>> bucket = contenedor[i];
-				for(Entry<K,V> entrada : bucket) {
-					int funcion = hashValue(entrada.getKey());
-					//reubico las entraas en el nuevobucket
-					PositionList<Entry<K,V>> nuevoBucket = nuevoContenedor[funcion];
-					nuevoBucket.addLast(entrada);
-					
-				}
-			
+			for(Entry<K,V> entrada : bucket) {
+				int funcion = hashValue(entrada.getKey());
+				//reubico las entraas en el nuevobucket
+				PositionList<Entry<K,V>> nuevoBucket = nuevoContenedor[funcion];
+				nuevoBucket.addLast(entrada);
+			}
 		}
 		contenedor = nuevoContenedor;
-		
-		
-		
-		
-		
-		
 	}
-	
+
 	private int nextPrimo(int siguientePrimo) {
 		while(!esPrimo(siguientePrimo)) {
 			siguientePrimo ++;
 		}
-		
+
 		return siguientePrimo;
 	}
-	
+
 	private boolean esPrimo(int primo) {
 		boolean esPrimo = true;
 		for(int i=2 ; i<primo && esPrimo ; i++) {
 			esPrimo = primo%i != 0;
 		}
-		
+
 		return esPrimo;
 	}
-    private boolean esFactor() {
-    	return size/cantBuckets>=FACTOR;
-    }
+	private boolean esFactor() {
+		return size/cantBuckets>=FACTOR;
+	}
 	@Override
 	public V put(K key, V value) throws InvalidKeyException {
 		checkKey(key);
 		V aRetornar= null;
-		int numeroBucket = hashValue(key);
 		boolean esta= false;
 		Entrada<K,V> entrada = null;
-		Iterator<Entry<K,V>> itBucket = contenedor[numeroBucket].iterator();
+		Iterator<Entry<K,V>> itBucket = contenedor[hashValue(key)].iterator();
 		while(!esta&&itBucket.hasNext()) {
 			entrada = (Entrada<K,V>)itBucket.next();
 			esta = entrada.getKey().equals(key);
@@ -132,10 +121,10 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 			aRetornar = entrada.getValue();
 			entrada.setValue(value);
 		}else {
-			if(esFactor()) {
+			if(esFactor())
 				resize();
-			}
-			contenedor[numeroBucket].addLast(new Entrada<K,V>(key,value));
+
+			contenedor[hashValue(key)].addLast(new Entrada<K,V>(key,value));
 			size++;
 		}
 		return aRetornar;
@@ -145,61 +134,60 @@ public class OpenHashMap<K,V> implements Map<K,V>{
 	public V remove(K key) throws InvalidKeyException {
 		checkKey(key);
 		V aRetornar = null;
-		
+
 		Position<Entry<K,V>> entrada = null;
 		boolean esta= false;
-	    Iterable<Position<Entry<K,V>>> iterador = contenedor[hashValue(key)].positions();
-	    Iterator<Position<Entry<K,V>>> itBucket = iterador.iterator();
-		
+		Iterable<Position<Entry<K,V>>> iterador = contenedor[hashValue(key)].positions();
+		Iterator<Position<Entry<K,V>>> itBucket = iterador.iterator();
+
 		while(!esta&&itBucket.hasNext()) {
 			entrada = itBucket.next();
 			esta = entrada.element().getKey().equals(key);
 		}
-		
+
 		if(esta) {
 			aRetornar = entrada.element().getValue();
 			try {
 				contenedor[hashValue(key)].remove(entrada);
 			} catch (InvalidPositionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		size--;
+			size--;
 		}
 		return aRetornar;
 	}
 
 	@Override
 	public Iterable<K> keys() {
-    PositionList<K> aRetornar = new DoubleLinkedList<K>();
-    for(int i= 0; i<cantBuckets;i++) {
-    	for(Entry<K,V> entrada : contenedor[i]) {
-    		aRetornar.addLast(entrada.getKey());
-    	}
-    }
+		PositionList<K> aRetornar = new DoubleLinkedList<K>();
+		for(int i= 0; i<cantBuckets;i++) {
+			for(Entry<K,V> entrada : contenedor[i]) {
+				aRetornar.addLast(entrada.getKey());
+			}
+		}
 		return aRetornar;
 	}
 
 	@Override
 	public Iterable<V> values() {
-	    PositionList<V> aRetornar = new DoubleLinkedList<V>();
-	    for(int i= 0; i<cantBuckets;i++) {
-	    	for(Entry<K,V> entrada : contenedor[i]) {
-	    		aRetornar.addLast(entrada.getValue());
-	    	}
-	    }
-			return aRetornar;
+		PositionList<V> aRetornar = new DoubleLinkedList<V>();
+		for(int i= 0; i<cantBuckets;i++) {
+			for(Entry<K,V> entrada : contenedor[i]) {
+				aRetornar.addLast(entrada.getValue());
+			}
+		}
+		return aRetornar;
 	}
 
 	@Override
 	public Iterable<Entry<K, V>> entries() {
-	    PositionList<Entry<K,V>> aRetornar = new DoubleLinkedList<Entry<K,V>>();
-	    for(int i= 0; i<cantBuckets;i++) {
-	    	for(Entry<K,V> entrada : contenedor[i]) {
-	    		aRetornar.addLast(entrada);
-	    	}
-	    }
-			return aRetornar;
+		PositionList<Entry<K,V>> aRetornar = new DoubleLinkedList<Entry<K,V>>();
+		for(int i= 0; i<cantBuckets;i++) {
+			for(Entry<K,V> entrada : contenedor[i]) {
+				aRetornar.addLast(entrada);
+			}
+		}
+		return aRetornar;
 	}
 
 }
