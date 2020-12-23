@@ -115,11 +115,19 @@ public class SimpleLinkedList<E> implements PositionList<E> {
 	public void addBefore(Position<E> p, E element) throws InvalidPositionException {
 		Node<E> nodo = checkPosition(p);
 		if(nodo==head)
-			head= new Node<E>(element,head);
+
+			head = new Node<E>(element, head);//existe el arrayList?
+
 		else {
 		Node<E> anterior = head;
-		while(anterior.getSiguiente()!=nodo) {
-			anterior = anterior.getSiguiente();
+
+		if(!isEmpty()) {
+			while(anterior.getSiguiente()!=nodo && anterior.getSiguiente()!=null) {
+				anterior = anterior.getSiguiente();
+			}
+			if(anterior.getSiguiente()!=nodo)
+				anterior = null;
+
 		}
 		anterior.setSiguiente(new Node<E>(element,anterior.getSiguiente()));
 		}
@@ -143,6 +151,7 @@ public class SimpleLinkedList<E> implements PositionList<E> {
       }
       size--;
 		return resultado;
+
 	}
 
 	@Override

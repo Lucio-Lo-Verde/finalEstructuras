@@ -17,7 +17,7 @@ public class ListTest {
 	 */
 
 	private PositionList<String> getList() {
-		return new SimpleLinkedList<String>();
+		return new DoubleLinkedList<String>();
 	}
 
 	@Before
