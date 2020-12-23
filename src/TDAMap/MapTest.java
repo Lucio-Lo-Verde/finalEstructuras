@@ -29,7 +29,7 @@ public class MapTest {
 
 	private Map<Integer, Integer> getMapeo() {
 
-		return new MapeoHashAbierto<Integer, Integer>();
+		return new OpenHashMap<Integer, Integer>();
 
 	}
 
